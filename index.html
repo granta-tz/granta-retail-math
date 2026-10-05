@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Granta Retail Math Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .card-hover { transition: all 0.2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1); }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+    /* Hide scrollbar but keep scroll functionality */
+    .overflow-x-auto::-webkit-scrollbar { display: none; }
+    /* Better touch targets on mobile */
+    @media (max-width: 640px) {
+      .tab-btn { min-height: 40px; }
+    }
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+
+  <!-- Header -->
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold text-lg">G</div>
+          <div>
+            <h1 class="text-lg font-bold tracking-tight">Granta Retail Math Suite</h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Toggle dark mode">
+            <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 sm:pb-8">
+    <!-- Top Navigation Tabs (Desktop only) -->
+    <nav class="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 hidden sm:block">
+      <div class="flex gap-2 overflow-x-auto pb-3" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+        <button onclick="showTab('markup')" id="tab-markup" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-primary-600 text-white shadow whitespace-nowrap active:scale-95 transition">Markup</button>
+        <button onclick="showTab('offer')" id="tab-offer" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap active:scale-95 transition">Offer / Discount</button>
+        <button onclick="showTab('profit')" id="tab-profit" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap active:scale-95 transition">Profit & Loss</button>
+        <button onclick="showTab('initial')" id="tab-initial" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap active:scale-95 transition">Initial Markup %</button>
+        <button onclick="showTab('markdown')" id="tab-markdown" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap active:scale-95 transition">Markdown</button>
+        <button onclick="showTab('sellthrough')" id="tab-sellthrough" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap active:scale-95 transition">Sell-Through</button>
+        <button onclick="showTab('guide')" id="tab-guide" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap active:scale-95 transition">Guide</button>
+        <button onclick="showTab('about')" id="tab-about" class="tab-btn flex-shrink-0 px-3.5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap active:scale-95 transition">About</button>
+      </div>
+    </nav>
+
+    <!-- ==================== MARKUP CALCULATOR ==================== -->
+    <div id="panel-markup" class="tab-panel">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Basic Markup Calculator</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Calculate markup rupees and percentage from cost and retail price.</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Cost Price (₹)</label>
+              <input type="number" id="mu-cost" value="400" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none" oninput="calcMarkup()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Retail Price (₹)</label>
+              <input type="number" id="mu-retail" value="999" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none" oninput="calcMarkup()">
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-2 gap-4">
+            <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4 text-center">
+              <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Markup ₹</p>
+              <p id="mu-dollars" class="text-2xl font-bold text-primary-700 dark:text-primary-300">₹599</p>
+            </div>
+            <div class="bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-4 text-center">
+              <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Markup %</p>
+              <p id="mu-percent" class="text-2xl font-bold text-emerald-700 dark:text-emerald-300">60.0%</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Find Cost or Retail</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Given a target markup %, find the maximum cost or required retail.</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Target Markup %</label>
+              <input type="number" id="target-mu" value="60" step="0.1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcTarget()">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Known Retail (₹)</label>
+                <input type="number" id="target-retail" value="999" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcTarget()">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Known Cost (₹)</label>
+                <input type="number" id="target-cost" value="400" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcTarget()">
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 space-y-3">
+            <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-xl px-4 py-3">
+              <span class="text-sm">Max Cost to achieve target</span>
+              <span id="max-cost" class="font-bold text-lg">₹399.60</span>
+            </div>
+            <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-xl px-4 py-3">
+              <span class="text-sm">Required Retail for target</span>
+              <span id="req-retail" class="font-bold text-lg">₹1,000.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== OFFER / DISCOUNT SIMULATOR ==================== -->
+    <div id="panel-offer" class="tab-panel hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-1">Offer / Discount Impact Calculator</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Enter product cost and original retail. Then set the offer % (e.g. 30% off, 50% off). 
+          See how much margin remains or if you will make a loss.
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-medium mb-1">Cost Price (₹)</label>
+            <input type="number" id="of-cost" value="400" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcOffer()">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Original Retail Price (₹)</label>
+            <input type="number" id="of-retail" value="999" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcOffer()">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Offer / Discount %</label>
+            <input type="number" id="of-discount" value="30" step="1" min="0" max="100" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcOffer()">
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 text-center">
+            <p class="text-xs text-gray-500 font-medium">Selling Price after Offer</p>
+            <p id="of-selling" class="text-2xl font-bold mt-1">₹699.30</p>
+          </div>
+          <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4 text-center">
+            <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Remaining Markup ₹</p>
+            <p id="of-markup-rs" class="text-2xl font-bold text-primary-700 dark:text-primary-300 mt-1">₹299.30</p>
+          </div>
+          <div class="bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-4 text-center">
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Remaining Markup %</p>
+            <p id="of-markup-pct" class="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">42.8%</p>
+          </div>
+          <div id="of-status-box" class="bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-4 text-center">
+            <p class="text-xs font-medium" id="of-status-label">Status</p>
+            <p id="of-status" class="text-2xl font-bold mt-1 text-emerald-700 dark:text-emerald-300">Profit</p>
+          </div>
+        </div>
+
+        <!-- Detailed comparison -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200 dark:border-gray-700">
+                <th class="text-left py-3 font-medium">Item</th>
+                <th class="text-right py-3 font-medium">Before Offer</th>
+                <th class="text-right py-3 font-medium">After Offer</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              <tr>
+                <td class="py-3">Selling Price</td>
+                <td class="text-right font-mono" id="of-before-price">₹999</td>
+                <td class="text-right font-mono font-semibold" id="of-after-price">₹699.30</td>
+              </tr>
+              <tr>
+                <td class="py-3">Cost</td>
+                <td class="text-right font-mono" id="of-cost-show">₹400</td>
+                <td class="text-right font-mono" id="of-cost-show2">₹400</td>
+              </tr>
+              <tr>
+                <td class="py-3">Markup (₹)</td>
+                <td class="text-right font-mono" id="of-before-mu">₹599</td>
+                <td class="text-right font-mono" id="of-after-mu">₹299.30</td>
+              </tr>
+              <tr>
+                <td class="py-3">Markup %</td>
+                <td class="text-right font-mono" id="of-before-pct">60.0%</td>
+                <td class="text-right font-mono" id="of-after-pct">42.8%</td>
+              </tr>
+              <tr class="bg-gray-50 dark:bg-gray-900/40">
+                <td class="py-3 font-semibold">Profit / Loss per unit</td>
+                <td class="text-right font-mono font-semibold text-emerald-600" id="of-before-pl">+₹599</td>
+                <td class="text-right font-mono font-semibold" id="of-after-pl">+₹299.30</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-4">
+          Tip: If “Remaining Markup ₹” becomes negative, you are selling below cost and making a loss on that product.
+        </p>
+      </div>
+    </div>
+
+    <!-- ==================== PROFIT & LOSS ==================== -->
+    <div id="panel-profit" class="tab-panel hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-xl font-semibold mb-1">Skeletal Profit & Loss Statement</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Enter the key figures to calculate Gross Margin and Net Profit (in ₹).</p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-medium mb-1">Gross Sales (₹)</label>
+            <input type="number" id="pl-gross" value="500000" step="1000" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcPL()">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Customer Returns & Allowances (₹)</label>
+            <input type="number" id="pl-returns" value="25000" step="1000" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcPL()">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Cost of Goods Sold (₹)</label>
+            <input type="number" id="pl-cogs" value="260000" step="1000" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcPL()">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Operating Expenses (₹)</label>
+            <input type="number" id="pl-opex" value="140000" step="1000" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcPL()">
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200 dark:border-gray-700">
+                <th class="text-left py-3 font-medium">Item</th>
+                <th class="text-right py-3 font-medium">Rupees (₹)</th>
+                <th class="text-right py-3 font-medium">% of Net Sales</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              <tr>
+                <td class="py-3">Gross Sales</td>
+                <td class="text-right font-mono" id="pl-r-gross">₹5,00,000</td>
+                <td class="text-right text-gray-500">—</td>
+              </tr>
+              <tr>
+                <td class="py-3">– Returns & Allowances</td>
+                <td class="text-right font-mono text-red-600" id="pl-r-returns">–₹25,000</td>
+                <td class="text-right text-gray-500" id="pl-r-returns-pct">5.0%</td>
+              </tr>
+              <tr class="bg-gray-50 dark:bg-gray-900/40">
+                <td class="py-3 font-semibold">Net Sales</td>
+                <td class="text-right font-mono font-semibold" id="pl-r-net">₹4,75,000</td>
+                <td class="text-right font-semibold">100.0%</td>
+              </tr>
+              <tr>
+                <td class="py-3">– Cost of Goods Sold</td>
+                <td class="text-right font-mono text-red-600" id="pl-r-cogs">–₹2,60,000</td>
+                <td class="text-right" id="pl-r-cogs-pct">54.7%</td>
+              </tr>
+              <tr class="bg-emerald-50 dark:bg-emerald-900/20">
+                <td class="py-3 font-semibold text-emerald-700 dark:text-emerald-400">Gross Margin</td>
+                <td class="text-right font-mono font-semibold text-emerald-700 dark:text-emerald-400" id="pl-r-gm">₹2,15,000</td>
+                <td class="text-right font-semibold text-emerald-700 dark:text-emerald-400" id="pl-r-gm-pct">45.3%</td>
+              </tr>
+              <tr>
+                <td class="py-3">– Operating Expenses</td>
+                <td class="text-right font-mono text-red-600" id="pl-r-opex">–₹1,40,000</td>
+                <td class="text-right" id="pl-r-opex-pct">29.5%</td>
+              </tr>
+              <tr class="bg-primary-50 dark:bg-primary-900/20">
+                <td class="py-3 font-bold text-primary-700 dark:text-primary-400">Net Operating Profit</td>
+                <td class="text-right font-mono font-bold text-primary-700 dark:text-primary-400" id="pl-r-profit">₹75,000</td>
+                <td class="text-right font-bold text-primary-700 dark:text-primary-400" id="pl-r-profit-pct">15.8%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== INITIAL MARKUP % ==================== -->
+    <div id="panel-initial" class="tab-panel hidden">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Initial Markup % Planner</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Calculate the initial markup needed to achieve desired gross margin after reductions (markdowns, shortages, discounts).</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Desired Gross Margin %</label>
+              <input type="number" id="im-gm" value="40" step="0.1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcInitialMarkup()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Retail Reductions % <span class="text-xs text-gray-400">(Markdowns + Shortages + Employee Discounts)</span></label>
+              <input type="number" id="im-reductions" value="25" step="0.1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcInitialMarkup()">
+            </div>
+          </div>
+
+          <div class="mt-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 text-white text-center">
+            <p class="text-sm opacity-90 mb-1">Required Initial Markup %</p>
+            <p id="im-result" class="text-4xl font-bold">52.0%</p>
+            <p class="text-xs opacity-75 mt-2">Formula: (GM% + Reductions%) ÷ (100% + Reductions%)</p>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Maintained Markup %</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">See the difference between initial and maintained markup after reductions.</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Initial Markup %</label>
+              <input type="number" id="mm-initial" value="52" step="0.1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcMaintained()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Retail Reductions %</label>
+              <input type="number" id="mm-reductions" value="25" step="0.1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcMaintained()">
+            </div>
+          </div>
+
+          <div class="mt-6 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl p-6 text-center">
+            <p class="text-sm text-emerald-600 dark:text-emerald-400 mb-1">Maintained Markup %</p>
+            <p id="mm-result" class="text-4xl font-bold text-emerald-700 dark:text-emerald-300">40.0%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MARKDOWN ==================== -->
+    <div id="panel-markdown" class="tab-panel hidden">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Markdown Calculator</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Calculate markdown rupees and percentage.</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Original / Current Retail (₹)</label>
+              <input type="number" id="md-original" value="999" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcMarkdown()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">New Retail Price (₹)</label>
+              <input type="number" id="md-new" value="699" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcMarkdown()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Net Sales of the group (₹)</label>
+              <input type="number" id="md-sales" value="50000" step="1000" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcMarkdown()">
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-2 gap-4">
+            <div class="bg-orange-50 dark:bg-orange-900/30 rounded-xl p-4 text-center">
+              <p class="text-xs text-orange-600 dark:text-orange-400 font-medium">Markdown ₹</p>
+              <p id="md-dollars" class="text-2xl font-bold text-orange-700 dark:text-orange-300">₹300</p>
+            </div>
+            <div class="bg-rose-50 dark:bg-rose-900/30 rounded-xl p-4 text-center">
+              <p class="text-xs text-rose-600 dark:text-rose-400 font-medium">Markdown % of Sales</p>
+              <p id="md-percent" class="text-2xl font-bold text-rose-700 dark:text-rose-300">0.6%</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Planned Markdowns</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Estimate total markdown rupees from planned sales and markdown %.</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Planned Net Sales (₹)</label>
+              <input type="number" id="pmd-sales" value="1000000" step="10000" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcPlannedMD()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Planned Markdown %</label>
+              <input type="number" id="pmd-pct" value="18" step="0.1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcPlannedMD()">
+            </div>
+          </div>
+
+          <div class="mt-6 bg-orange-50 dark:bg-orange-900/30 rounded-2xl p-6 text-center">
+            <p class="text-sm text-orange-600 dark:text-orange-400 mb-1">Planned Markdown Rupees</p>
+            <p id="pmd-result" class="text-4xl font-bold text-orange-700 dark:text-orange-300">₹1,80,000</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SELL-THROUGH & WOS ==================== -->
+    <div id="panel-sellthrough" class="tab-panel hidden">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Sell-Through %</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Units sold ÷ Beginning units on hand × 100</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Units Sold (this week)</label>
+              <input type="number" id="st-sold" value="45" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcSellThrough()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Beginning Units on Hand</label>
+              <input type="number" id="st-begin" value="120" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcSellThrough()">
+            </div>
+          </div>
+
+          <div class="mt-6 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl p-6 text-center">
+            <p class="text-sm text-indigo-600 dark:text-indigo-400 mb-1">Sell-Through %</p>
+            <p id="st-result" class="text-4xl font-bold text-indigo-700 dark:text-indigo-300">37.5%</p>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 card-hover">
+          <h2 class="text-xl font-semibold mb-1">Weeks of Supply (WOS)</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Beginning units ÷ Units sold in the week</p>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Beginning Units on Hand</label>
+              <input type="number" id="wos-begin" value="120" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcWOS()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Units Sold in the Week</label>
+              <input type="number" id="wos-sold" value="45" step="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none" oninput="calcWOS()">
+            </div>
+          </div>
+
+          <div class="mt-6 bg-violet-50 dark:bg-violet-900/30 rounded-2xl p-6 text-center">
+            <p class="text-sm text-violet-600 dark:text-violet-400 mb-1">Weeks of Supply</p>
+            <p id="wos-result" class="text-4xl font-bold text-violet-700 dark:text-violet-300">2.7</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== GUIDE ==================== -->
+    <div id="panel-guide" class="tab-panel hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold mb-2">Guide – How to Use Each Calculator</h2>
+        <p class="text-gray-500 dark:text-gray-400 mb-8">Simple explanation of what each tab is for and how to use it in your retail business.</p>
+
+        <!-- Markup -->
+        <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-primary-600 dark:text-primary-400 mb-2">1. Markup</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-3"><strong>What it is used for:</strong> To decide the selling price of a product based on its cost, or to check how much profit (markup) you are making on a product.</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>How to use:</strong></p>
+          <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+            <li>Enter the <strong>Cost Price</strong> of the product.</li>
+            <li>Enter the <strong>Retail Price</strong> you want to sell it at.</li>
+            <li>The calculator shows Markup in ₹ and Markup %.</li>
+            <li>In the right side, enter a target Markup % to find the maximum cost you can pay, or the retail price you should set.</li>
+          </ul>
+        </div>
+
+        <!-- Offer / Discount -->
+        <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-primary-600 dark:text-primary-400 mb-2">2. Offer / Discount</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-3"><strong>What it is used for:</strong> To check the impact of giving offers like 30% off, 40% off, or 50% off. It shows if you will still make profit or go into loss after the discount.</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>How to use:</strong></p>
+          <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+            <li>Enter the <strong>Cost Price</strong> of the product.</li>
+            <li>Enter the <strong>Original Retail Price</strong>.</li>
+            <li>Enter the <strong>Offer %</strong> (example: 30 for 30% off).</li>
+            <li>See the new selling price, remaining markup in ₹ and %, and clear status: Profit / Break-even / LOSS.</li>
+          </ul>
+        </div>
+
+        <!-- Profit & Loss -->
+        <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-primary-600 dark:text-primary-400 mb-2">3. Profit & Loss</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-3"><strong>What it is used for:</strong> To see the overall profit of your store or department. It shows Gross Margin and Net Operating Profit after expenses.</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>How to use:</strong></p>
+          <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+            <li>Enter <strong>Gross Sales</strong> (total sales before returns).</li>
+            <li>Enter <strong>Customer Returns & Allowances</strong>.</li>
+            <li>Enter <strong>Cost of Goods Sold</strong> (what you paid for the products sold).</li>
+            <li>Enter <strong>Operating Expenses</strong> (rent, salary, electricity, etc.).</li>
+            <li>The table shows Net Sales, Gross Margin, and final Net Profit with percentages.</li>
+          </ul>
+        </div>
+
+        <!-- Initial Markup % -->
+        <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-primary-600 dark:text-primary-400 mb-2">4. Initial Markup %</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-3"><strong>What it is used for:</strong> To plan the starting markup you need on products so that even after markdowns, shortages, and discounts, you still achieve your desired gross margin.</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>How to use:</strong></p>
+          <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+            <li>Enter the <strong>Desired Gross Margin %</strong> you want to achieve at the end.</li>
+            <li>Enter expected <strong>Retail Reductions %</strong> (total of markdowns + shortages + employee discounts).</li>
+            <li>The calculator shows the <strong>Initial Markup %</strong> you should start with.</li>
+            <li>Use the right side to convert Initial Markup into Maintained Markup after reductions.</li>
+          </ul>
+        </div>
+
+        <!-- Markdown -->
+        <div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-primary-600 dark:text-primary-400 mb-2">5. Markdown</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-3"><strong>What it is used for:</strong> To calculate how much money you are reducing from the original price, and to plan total markdown budget for a period.</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>How to use:</strong></p>
+          <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+            <li>Enter <strong>Original Retail</strong> and <strong>New Retail Price</strong> to see Markdown in ₹.</li>
+            <li>Enter Net Sales of the group to see Markdown as % of sales.</li>
+            <li>On the right side, enter Planned Net Sales and Planned Markdown % to know total markdown rupees you should keep aside.</li>
+          </ul>
+        </div>
+
+        <!-- Sell-Through & WOS -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-primary-600 dark:text-primary-400 mb-2">6. Sell-Through & WOS</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-3"><strong>What it is used for:</strong> To measure how fast your stock is selling (Sell-Through) and how many weeks of stock you currently have (Weeks of Supply).</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>How to use:</strong></p>
+          <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+            <li><strong>Sell-Through %:</strong> Enter units sold in the week and beginning units on hand. Higher % means stock is moving well.</li>
+            <li><strong>Weeks of Supply (WOS):</strong> Enter beginning units and units sold in the week. Lower WOS means stock will finish soon; higher WOS means you may have excess stock.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ABOUT ==================== -->
+    <div id="panel-about" class="tab-panel hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold mb-4">About Granta Retail Math Suite</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+          This free calculator is based on the key formulas from the book 
+          <strong>Mathematics for Retail Buying</strong> (9th Edition) by Bette K. Tepper & Marla Greene.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+          Currency is set to <strong>Indian Rupee (₹)</strong>.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-2">Included Calculators</h3>
+        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 mb-6">
+          <li>Basic Markup (₹ and %)</li>
+          <li>Cost / Retail from target markup</li>
+          <li><strong>Offer / Discount Impact</strong> (30% off, 50% off etc. – see remaining margin or loss)</li>
+          <li>Skeletal Profit & Loss Statement</li>
+          <li>Initial Markup % Planner</li>
+          <li>Maintained Markup %</li>
+          <li>Markdown Calculator</li>
+          <li>Planned Markdown Rupees</li>
+          <li>Sell-Through %</li>
+          <li>Weeks of Supply (WOS)</li>
+        </ul>
+
+        <h3 class="font-semibold text-lg mb-2">Is this enough for pricing products?</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+          Yes, for most day-to-day retail pricing decisions these are the core calculations you need:
+        </p>
+        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 mb-4">
+          <li>How much markup to put on a product</li>
+          <li>What initial markup is required to still make profit after discounts & markdowns</li>
+          <li>Impact of offers (30%, 40%, 50% off) on your margin</li>
+          <li>Whether you are making profit or loss after an offer</li>
+          <li>Overall store profit (P&L)</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+          Advanced buyers also use Open-to-Buy, Cumulative Markup, and Six-Month Plans, but the calculators above cover the essential pricing and margin decisions.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-2">How to use offline</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+          Just open this <code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm">index.html</code> file in any modern browser. No internet needed after the first load.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation (Mobile only) -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-area-bottom">
+    <div class="flex justify-around items-center h-16 px-1">
+      <button onclick="showTab('markup')" id="btab-markup" class="btab-btn flex flex-col items-center justify-center flex-1 h-full text-primary-600 dark:text-primary-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        <span class="text-[10px] font-medium">Markup</span>
+      </button>
+      <button onclick="showTab('offer')" id="btab-offer" class="btab-btn flex flex-col items-center justify-center flex-1 h-full text-gray-500 dark:text-gray-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="text-[10px] font-medium">Offer</span>
+      </button>
+      <button onclick="showTab('profit')" id="btab-profit" class="btab-btn flex flex-col items-center justify-center flex-1 h-full text-gray-500 dark:text-gray-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <span class="text-[10px] font-medium">P&L</span>
+      </button>
+      <button onclick="showTab('initial')" id="btab-initial" class="btab-btn flex flex-col items-center justify-center flex-1 h-full text-gray-500 dark:text-gray-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        <span class="text-[10px] font-medium">Initial %</span>
+      </button>
+      <button onclick="showTab('more')" id="btab-more" class="btab-btn flex flex-col items-center justify-center flex-1 h-full text-gray-500 dark:text-gray-400">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span class="text-[10px] font-medium">More</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- More Menu (Mobile) -->
+  <div id="more-menu" class="sm:hidden fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/40" onclick="closeMoreMenu()"></div>
+    <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl p-4 pb-8 shadow-xl">
+      <div class="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
+      <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3 px-1">More Calculators</p>
+      <div class="space-y-1">
+        <button onclick="showTab('markdown'); closeMoreMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium">Markdown</button>
+        <button onclick="showTab('sellthrough'); closeMoreMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium">Sell-Through & WOS</button>
+        <button onclick="showTab('guide'); closeMoreMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium">Guide</button>
+        <button onclick="showTab('about'); closeMoreMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium">About</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center text-sm text-gray-500 dark:text-gray-400 py-6 hidden sm:block">
+    Based on Mathematics for Retail Buying (9th Ed.) • Currency: ₹
+  </footer>
+
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      html.classList.add('dark');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+    });
+
+    // Tab switching
+    function showTab(name) {
+      // Handle "More" button specially
+      if (name === 'more') {
+        document.getElementById('more-menu').classList.remove('hidden');
+        return;
+      }
+
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      const panel = document.getElementById('panel-' + name);
+      if (panel) panel.classList.remove('hidden');
+      
+      // Update top tabs (desktop)
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-primary-600', 'text-white', 'shadow');
+        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+      });
+      const activeTop = document.getElementById('tab-' + name);
+      if (activeTop) {
+        activeTop.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+        activeTop.classList.add('bg-primary-600', 'text-white', 'shadow');
+      }
+
+      // Update bottom tabs (mobile)
+      document.querySelectorAll('.btab-btn').forEach(btn => {
+        btn.classList.remove('text-primary-600', 'dark:text-primary-400');
+        btn.classList.add('text-gray-500', 'dark:text-gray-400');
+      });
+
+      // Highlight the matching bottom tab, or "More" if it's a secondary tab
+      const mainTabs = ['markup', 'offer', 'profit', 'initial'];
+      let bottomId = mainTabs.includes(name) ? 'btab-' + name : 'btab-more';
+      const activeBottom = document.getElementById(bottomId);
+      if (activeBottom) {
+        activeBottom.classList.remove('text-gray-500', 'dark:text-gray-400');
+        activeBottom.classList.add('text-primary-600', 'dark:text-primary-400');
+      }
+    }
+
+    function closeMoreMenu() {
+      document.getElementById('more-menu').classList.add('hidden');
+    }
+
+    // Helpers – Indian Rupee formatting
+    function fmt(n) {
+      return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtMoney(n) {
+      return '₹' + Math.round(n).toLocaleString('en-IN');
+    }
+    function fmtMoneyDec(n) {
+      return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function pct(n) {
+      return n.toFixed(1) + '%';
+    }
+
+    // Markup Calculator
+    function calcMarkup() {
+      const cost = parseFloat(document.getElementById('mu-cost').value) || 0;
+      const retail = parseFloat(document.getElementById('mu-retail').value) || 0;
+      const dollars = retail - cost;
+      const percent = retail ? (dollars / retail) * 100 : 0;
+      document.getElementById('mu-dollars').textContent = '₹' + Math.round(dollars).toLocaleString('en-IN');
+      document.getElementById('mu-percent').textContent = pct(percent);
+    }
+
+    function calcTarget() {
+      const target = parseFloat(document.getElementById('target-mu').value) || 0;
+      const retail = parseFloat(document.getElementById('target-retail').value) || 0;
+      const cost = parseFloat(document.getElementById('target-cost').value) || 0;
+      
+      const maxCost = retail * (1 - target / 100);
+      const reqRetail = target < 100 ? cost / (1 - target / 100) : 0;
+      
+      document.getElementById('max-cost').textContent = fmtMoneyDec(maxCost);
+      document.getElementById('req-retail').textContent = fmtMoneyDec(reqRetail);
+    }
+
+    // Offer / Discount Calculator
+    function calcOffer() {
+      const cost = parseFloat(document.getElementById('of-cost').value) || 0;
+      const retail = parseFloat(document.getElementById('of-retail').value) || 0;
+      const discount = parseFloat(document.getElementById('of-discount').value) || 0;
+
+      const selling = retail * (1 - discount / 100);
+      const markupRs = selling - cost;
+      const markupPct = selling ? (markupRs / selling) * 100 : 0;
+
+      const beforeMu = retail - cost;
+      const beforePct = retail ? (beforeMu / retail) * 100 : 0;
+
+      document.getElementById('of-selling').textContent = fmtMoneyDec(selling);
+      document.getElementById('of-markup-rs').textContent = (markupRs >= 0 ? '₹' : '–₹') + Math.abs(Math.round(markupRs)).toLocaleString('en-IN');
+      document.getElementById('of-markup-pct').textContent = pct(markupPct);
+
+      // Status
+      const statusBox = document.getElementById('of-status-box');
+      const statusLabel = document.getElementById('of-status-label');
+      const statusText = document.getElementById('of-status');
+
+      if (markupRs > 0) {
+        statusBox.className = 'bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-4 text-center';
+        statusLabel.className = 'text-xs text-emerald-600 dark:text-emerald-400 font-medium';
+        statusText.className = 'text-2xl font-bold mt-1 text-emerald-700 dark:text-emerald-300';
+        statusText.textContent = 'Profit';
+      } else if (markupRs === 0) {
+        statusBox.className = 'bg-yellow-50 dark:bg-yellow-900/30 rounded-xl p-4 text-center';
+        statusLabel.className = 'text-xs text-yellow-600 dark:text-yellow-400 font-medium';
+        statusText.className = 'text-2xl font-bold mt-1 text-yellow-700 dark:text-yellow-300';
+        statusText.textContent = 'Break-even';
+      } else {
+        statusBox.className = 'bg-red-50 dark:bg-red-900/30 rounded-xl p-4 text-center';
+        statusLabel.className = 'text-xs text-red-600 dark:text-red-400 font-medium';
+        statusText.className = 'text-2xl font-bold mt-1 text-red-700 dark:text-red-300';
+        statusText.textContent = 'LOSS';
+      }
+
+      // Table
+      document.getElementById('of-before-price').textContent = fmtMoney(retail);
+      document.getElementById('of-after-price').textContent = fmtMoneyDec(selling);
+      document.getElementById('of-cost-show').textContent = fmtMoney(cost);
+      document.getElementById('of-cost-show2').textContent = fmtMoney(cost);
+      document.getElementById('of-before-mu').textContent = fmtMoney(beforeMu);
+      document.getElementById('of-after-mu').textContent = (markupRs >= 0 ? '' : '–') + fmtMoneyDec(Math.abs(markupRs));
+      document.getElementById('of-before-pct').textContent = pct(beforePct);
+      document.getElementById('of-after-pct').textContent = pct(markupPct);
+
+      const beforePL = document.getElementById('of-before-pl');
+      const afterPL = document.getElementById('of-after-pl');
+      beforePL.textContent = '+' + fmtMoney(beforeMu);
+      beforePL.className = 'text-right font-mono font-semibold text-emerald-600';
+      
+      if (markupRs > 0) {
+        afterPL.textContent = '+' + fmtMoneyDec(markupRs);
+        afterPL.className = 'text-right font-mono font-semibold text-emerald-600';
+      } else if (markupRs === 0) {
+        afterPL.textContent = '₹0';
+        afterPL.className = 'text-right font-mono font-semibold text-yellow-600';
+      } else {
+        afterPL.textContent = '–' + fmtMoneyDec(Math.abs(markupRs));
+        afterPL.className = 'text-right font-mono font-semibold text-red-600';
+      }
+    }
+
+    // Profit & Loss
+    function calcPL() {
+      const gross = parseFloat(document.getElementById('pl-gross').value) || 0;
+      const returns = parseFloat(document.getElementById('pl-returns').value) || 0;
+      const cogs = parseFloat(document.getElementById('pl-cogs').value) || 0;
+      const opex = parseFloat(document.getElementById('pl-opex').value) || 0;
+
+      const net = gross - returns;
+      const gm = net - cogs;
+      const profit = gm - opex;
+
+      document.getElementById('pl-r-gross').textContent = fmtMoney(gross);
+      document.getElementById('pl-r-returns').textContent = '–' + fmtMoney(returns);
+      document.getElementById('pl-r-returns-pct').textContent = gross ? pct((returns / gross) * 100) : '0%';
+      document.getElementById('pl-r-net').textContent = fmtMoney(net);
+      document.getElementById('pl-r-cogs').textContent = '–' + fmtMoney(cogs);
+      document.getElementById('pl-r-cogs-pct').textContent = net ? pct((cogs / net) * 100) : '0%';
+      document.getElementById('pl-r-gm').textContent = fmtMoney(gm);
+      document.getElementById('pl-r-gm-pct').textContent = net ? pct((gm / net) * 100) : '0%';
+      document.getElementById('pl-r-opex').textContent = '–' + fmtMoney(opex);
+      document.getElementById('pl-r-opex-pct').textContent = net ? pct((opex / net) * 100) : '0%';
+      document.getElementById('pl-r-profit').textContent = fmtMoney(profit);
+      document.getElementById('pl-r-profit-pct').textContent = net ? pct((profit / net) * 100) : '0%';
+    }
+
+    // Initial Markup
+    function calcInitialMarkup() {
+      const gm = parseFloat(document.getElementById('im-gm').value) || 0;
+      const red = parseFloat(document.getElementById('im-reductions').value) || 0;
+      const result = (gm + red) / (100 + red) * 100;
+      document.getElementById('im-result').textContent = pct(result);
+    }
+
+    function calcMaintained() {
+      const initial = parseFloat(document.getElementById('mm-initial').value) || 0;
+      const red = parseFloat(document.getElementById('mm-reductions').value) || 0;
+      const result = initial - red * (1 - initial / 100);
+      document.getElementById('mm-result').textContent = pct(result);
+    }
+
+    // Markdown
+    function calcMarkdown() {
+      const original = parseFloat(document.getElementById('md-original').value) || 0;
+      const newPrice = parseFloat(document.getElementById('md-new').value) || 0;
+      const sales = parseFloat(document.getElementById('md-sales').value) || 0;
+      const dollars = original - newPrice;
+      const percent = sales ? (dollars / sales) * 100 : 0;
+      document.getElementById('md-dollars').textContent = '₹' + Math.round(dollars).toLocaleString('en-IN');
+      document.getElementById('md-percent').textContent = pct(percent);
+    }
+
+    function calcPlannedMD() {
+      const sales = parseFloat(document.getElementById('pmd-sales').value) || 0;
+      const pctVal = parseFloat(document.getElementById('pmd-pct').value) || 0;
+      const result = sales * (pctVal / 100);
+      document.getElementById('pmd-result').textContent = fmtMoney(result);
+    }
+
+    // Sell-through & WOS
+    function calcSellThrough() {
+      const sold = parseFloat(document.getElementById('st-sold').value) || 0;
+      const begin = parseFloat(document.getElementById('st-begin').value) || 0;
+      const result = begin ? (sold / begin) * 100 : 0;
+      document.getElementById('st-result').textContent = pct(result);
+    }
+
+    function calcWOS() {
+      const begin = parseFloat(document.getElementById('wos-begin').value) || 0;
+      const sold = parseFloat(document.getElementById('wos-sold').value) || 0;
+      const result = sold ? begin / sold : 0;
+      document.getElementById('wos-result').textContent = result.toFixed(1);
+    }
+
+    // Initialize all
+    calcMarkup();
+    calcTarget();
+    calcOffer();
+    calcPL();
+    calcInitialMarkup();
+    calcMaintained();
+    calcMarkdown();
+    calcPlannedMD();
+    calcSellThrough();
+    calcWOS();
+  </script>
+</body>
+</html>
